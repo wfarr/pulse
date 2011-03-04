@@ -1,4 +1,11 @@
+module ExcludeFromLogs
+  def process(request, *args)
+    logger.silence { super }
+  end
+end
+
 class PulseController < ActionController::Base
+  include ExcludeFromLogs
   session :off unless Rails::VERSION::STRING >= "2.3"
 
   #The pulse action. Runs <tt>select 1</tt> on the DB. If a sane result is
@@ -13,10 +20,5 @@ class PulseController < ActionController::Base
     else
       render :text => '<html><body>ERROR</body></html>', :status => :internal_server_error
     end
-  end
-
-  #cancel out loggin for the PulseController by defining logger as <tt>nil</tt>
-  def logger
-    nil
   end
 end
