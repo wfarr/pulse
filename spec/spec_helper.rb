@@ -1,7 +1,15 @@
 $LOAD_PATH.unshift 'lib/'
 
 require 'rubygems'
-require 'multi_rails_init'
+require 'isolate/scenarios'
+require 'isolate/now'
+require 'active_support'
+require 'action_pack'
+require 'action_controller'
+require 'action_controller/test_process'
+require 'activerecord'
+require 'rails/version'
+require 'pulse'
 
 #mock out some rails related stuff
 
@@ -28,5 +36,3 @@ rescue LoadError
   require 'spec'
   require 'spec/rails'
 end
-
-require 'pulse'
