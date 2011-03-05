@@ -1,3 +1,31 @@
+ActiveSupport::CoreExtensions::Module.class_eval do
+  def alias_method_chain_unlink(target, feature) 
+ 
+    # Strip out punctuation on predicates or bang methods since
+    # e.g. target?_without_feature is not a valid method name.
+    aliased_target, punctuation = target.to_s.sub(/([?!=])$/, ''), $1
+    yield(aliased_target, punctuation) if block_given?
+ 
+    with_method, without_method = "#{aliased_target}_with_#{feature}#{punctuation}", "#{aliased_target}_without_#{feature}#{punctuation}"
+ 
+    alias_method target, without_method
+ 
+    case
+    when public_method_defined?(without_method)
+      public target
+    when protected_method_defined?(without_method)
+      protected target
+    when private_method_defined?(without_method)
+      private target
+    end
+  end
+end
+
+ActionController::Base.class_eval do
+  alias_method_chain_unlink :render, :passenger
+  alias_method_chain_unlink :perform_action, :passenger
+end
+
 class PulseController < ActionController::Base
   session :off unless Rails::VERSION::STRING >= "2.3"
 
@@ -16,6 +44,6 @@ class PulseController < ActionController::Base
   end
   
   def logger
-    request.env[PASSENGER_ANALYTICS_WEB_LOG]
+    nil
   end
 end
